@@ -168,52 +168,134 @@ button:hover {
   background: #ff4d4f;
 }
 @media (max-width: 600px) {
+  body {
+    padding: 0 16px;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    margin-top: 20px;
+    text-align: center;
+  }
+
   form {
     min-width: unset;
-    width: 95vw;
-    padding: 20px 8px 16px 8px;
+    width: 100%;
+    max-width: 400px;
+    padding: 24px 16px;
+    margin-top: 16px;
   }
+
+  input[type="text"] {
+    padding: 16px 12px;
+    font-size: 1.1rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  button {
+    padding: 16px 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
   #result {
-    width: 100vw;
-    padding: 0 4vw;
+    width: 100%;
+    padding: 0;
+    margin-top: 24px;
   }
+
   #qrcode {
-    width: 90vw !important;
-    max-width: 95vw;
-    padding: 6vw;
+    width: auto !important;
+    max-width: 280px;
+    padding: 16px;
+    margin: 0 auto;
   }
+
+  #qrcode img,
+  #qrcode canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 250px;
+  }
+
   .qr-actions {
     width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
   }
+
   #downloadBtn,
   #saveBtn {
     width: 100%;
     min-width: 0;
+    padding: 14px;
+    font-size: 1rem;
   }
+
+  h3 {
+    font-size: 1.4rem;
+    margin-top: 32px;
+    text-align: center;
+  }
+
   #savedQrs {
-    gap: 12px;
-    max-width: 100vw;
-    padding: 0 2vw;
+    gap: 16px;
+    max-width: 100%;
+    padding: 0;
+    justify-content: center;
   }
+
   .saved-qr {
     min-width: 0;
-    width: 90vw;
-    max-width: 95vw;
-    padding: 10px;
+    width: 100%;
+    max-width: 280px;
+    padding: 16px;
+    margin: 0 auto;
   }
+
   .saved-qr img {
-    width: 60vw !important;
-    max-width: 80vw;
-    padding: 8px;
+    width: 150px !important;
+    height: 150px !important;
+    max-width: none;
+    padding: 12px;
   }
+
+  .saved-qr div {
+    font-size: 0.95rem !important;
+    margin-top: 12px !important;
+    padding: 0 8px;
+  }
+
   #qrModalCard {
     min-width: 0;
-    width: 92vw;
-    padding: 18px 4vw 18px 4vw;
+    width: 90vw;
+    max-width: 350px;
+    padding: 24px 16px;
   }
+
   #modalQrImg {
-    width: 60vw !important;
-    max-width: 80vw;
-    padding: 8px;
+    width: 200px !important;
+    height: 200px !important;
+    max-width: none;
+    padding: 12px;
+  }
+
+  #modalQrText {
+    font-size: 1rem;
+    padding: 0 8px;
+  }
+
+  #modalDownload,
+  #modalDelete {
+    padding: 12px 16px;
+    font-size: 1rem;
+    margin: 6px;
+  }
+
+  #closeModal {
+    font-size: 1.8rem;
+    top: 8px;
+    right: 12px;
   }
 }
