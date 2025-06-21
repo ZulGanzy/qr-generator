@@ -9,7 +9,7 @@ window.addEventListener("DOMContentLoaded", showSavedQrs);
 form.addEventListener("submit", function (e) {
   e.preventDefault();
   const text = document.getElementById("text").value.trim();
-  qrcodeDiv.innerHTML = ""; 
+  qrcodeDiv.innerHTML = "";
   downloadBtn.style.display = "none";
   saveBtn.style.display = "none";
   if (text) {
@@ -29,6 +29,16 @@ form.addEventListener("submit", function (e) {
 });
 
 downloadBtn.addEventListener("click", function () {
+  const text = document.getElementById("text").value.trim();
+  // Fungsi untuk membuat nama file yang aman
+  function safeFileName(str) {
+    return (
+      str
+        .replace(/[^a-z0-9]/gi, "_")
+        .toLowerCase()
+        .substring(0, 40) || "qrcode"
+    );
+  }
   const img = qrcodeDiv.querySelector("img");
   const canvas = qrcodeDiv.querySelector("canvas");
   let url;
@@ -48,7 +58,7 @@ downloadBtn.addEventListener("click", function () {
       const paddedUrl = tempCanvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = paddedUrl;
-      a.download = "qrcode.png";
+      a.download = safeFileName(text) + ".png";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -69,7 +79,7 @@ downloadBtn.addEventListener("click", function () {
   if (url) {
     const a = document.createElement("a");
     a.href = url;
-    a.download = "qrcode.png";
+    a.download = safeFileName(text) + ".png";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -88,7 +98,7 @@ saveBtn.addEventListener("click", function () {
   }
   if (url && text) {
     let saved = JSON.parse(localStorage.getItem("savedQrs") || "[]");
-    if (!saved.some(qr => qr.text === text)) {
+    if (!saved.some((qr) => qr.text === text)) {
       saved.push({ text, url });
       localStorage.setItem("savedQrs", JSON.stringify(saved));
       showSavedQrs();
@@ -105,7 +115,7 @@ function showSavedQrs() {
     savedQrsDiv.innerHTML = "<p style='color:#888;'>Belum ada QR code tersimpan.</p>";
     return;
   }
-  saved.forEach(qr => {
+  saved.forEach((qr) => {
     const wrap = document.createElement("div");
     wrap.className = "saved-qr";
     wrap.innerHTML = `
@@ -133,26 +143,35 @@ function openQrModal(qr) {
   qrModal.style.display = "flex";
 }
 
-closeModal.onclick = function() {
+closeModal.onclick = function () {
   qrModal.style.display = "none";
   currentModalQr = null;
 };
 
-modalDownload.onclick = function() {
+modalDownload.onclick = function () {
   if (currentModalQr) {
+    // Fungsi untuk membuat nama file yang aman
+    function safeFileName(str) {
+      return (
+        str
+          .replace(/[^a-z0-9]/gi, "_")
+          .toLowerCase()
+          .substring(0, 40) || "qrcode"
+      );
+    }
     const a = document.createElement("a");
     a.href = currentModalQr.url;
-    a.download = "qrcode.png";
+    a.download = safeFileName(currentModalQr.text) + ".png";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   }
 };
 
-modalDelete.onclick = function() {
+modalDelete.onclick = function () {
   if (currentModalQr) {
     let saved = JSON.parse(localStorage.getItem("savedQrs") || "[]");
-    saved = saved.filter(qr => qr.text !== currentModalQr.text);
+    saved = saved.filter((qr) => qr.text !== currentModalQr.text);
     localStorage.setItem("savedQrs", JSON.stringify(saved));
     showSavedQrs();
     qrModal.style.display = "none";
@@ -160,7 +179,7 @@ modalDelete.onclick = function() {
   }
 };
 
-qrModal.onclick = function(e) {
+qrModal.onclick = function (e) {
   if (e.target === qrModal) {
     qrModal.style.display = "none";
     currentModalQr = null;
