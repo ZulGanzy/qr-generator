@@ -2,13 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QR Code Generator</title>
     <link rel="stylesheet" href="style.css" />
-    <link rel="shortcut icon" href="image.png" type="image/x-icon">
+    <link rel="shortcut icon" href="image.png" type="image/x-icon" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   </head>
   <body>
+    <script>
+      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        alert("Untuk pengalaman terbaik, aktifkan mode Situs Desktop di browser Anda agar fitur berjalan dengan baik.");
+      }
+    </script>
     <h2>QR Code Generator</h2>
     <form id="qrForm">
       <input type="text" name="text" id="text" placeholder="Enter text for QR code" required />
@@ -17,17 +22,17 @@
     <div id="result">
       <div id="qrcode"></div>
       <div class="qr-actions">
-        <button id="downloadBtn" style="display:none;">Download QR Code</button>
-        <button id="saveBtn" style="display:none;">Simpan QR</button>
+        <button id="downloadBtn" style="display: none">Download QR Code</button>
+        <button id="saveBtn" style="display: none">Simpan QR</button>
       </div>
     </div>
-    <h3 style="margin-top:48px;">QR Code Tersimpan</h3>
+    <h3 style="margin-top: 48px">QR Code Tersimpan</h3>
     <div id="savedQrs"></div>
 
     <div id="qrModal">
       <div id="qrModalCard">
         <button id="closeModal">&times;</button>
-        <img id="modalQrImg" src="" alt="qr" width="180" height="180">
+        <img id="modalQrImg" src="" alt="qr" width="180" height="180" />
         <div id="modalQrText"></div>
         <button id="modalDownload">Download</button>
         <button id="modalDelete">Hapus</button>
