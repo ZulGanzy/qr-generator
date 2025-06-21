@@ -169,46 +169,49 @@ button:hover {
 }
 @media (max-width: 600px) {
   body {
-    padding: 0 16px;
+    padding: 0 20px;
+    font-size: 18px;
   }
 
   h2 {
-    font-size: 1.8rem;
-    margin-top: 20px;
+    font-size: 2.2rem;
+    margin-top: 30px;
     text-align: center;
   }
 
   form {
     min-width: unset;
     width: 100%;
-    max-width: 400px;
-    padding: 24px 16px;
-    margin-top: 16px;
+    max-width: 100%;
+    padding: 30px 20px;
+    margin-top: 20px;
   }
 
   input[type="text"] {
-    padding: 16px 12px;
-    font-size: 1.1rem;
+    padding: 20px 16px;
+    font-size: 1.3rem;
     width: 100%;
     box-sizing: border-box;
+    min-height: 56px;
   }
 
   button {
-    padding: 16px 12px;
-    font-size: 1.1rem;
+    padding: 20px 16px;
+    font-size: 1.3rem;
     font-weight: 600;
+    min-height: 56px;
   }
 
   #result {
     width: 100%;
     padding: 0;
-    margin-top: 24px;
+    margin-top: 30px;
   }
 
   #qrcode {
     width: auto !important;
-    max-width: 280px;
-    padding: 16px;
+    max-width: 90vw;
+    padding: 20px;
     margin: 0 auto;
   }
 
@@ -216,31 +219,34 @@ button:hover {
   #qrcode canvas {
     width: 100% !important;
     height: auto !important;
-    max-width: 250px;
+    max-width: 320px;
+    min-width: 250px;
   }
 
   .qr-actions {
     width: 100%;
-    max-width: 280px;
+    max-width: 100%;
     margin: 0 auto;
+    gap: 12px;
   }
 
   #downloadBtn,
   #saveBtn {
     width: 100%;
     min-width: 0;
-    padding: 14px;
-    font-size: 1rem;
+    padding: 18px;
+    font-size: 1.2rem;
+    min-height: 56px;
   }
 
   h3 {
-    font-size: 1.4rem;
-    margin-top: 32px;
+    font-size: 1.8rem;
+    margin-top: 40px;
     text-align: center;
   }
 
   #savedQrs {
-    gap: 16px;
+    gap: 20px;
     max-width: 100%;
     padding: 0;
     justify-content: center;
@@ -249,53 +255,83 @@ button:hover {
   .saved-qr {
     min-width: 0;
     width: 100%;
-    max-width: 280px;
-    padding: 16px;
+    max-width: 100%;
+    padding: 20px;
     margin: 0 auto;
   }
 
   .saved-qr img {
-    width: 150px !important;
-    height: 150px !important;
+    width: 200px !important;
+    height: 200px !important;
     max-width: none;
-    padding: 12px;
+    padding: 16px;
   }
 
   .saved-qr div {
-    font-size: 0.95rem !important;
-    margin-top: 12px !important;
-    padding: 0 8px;
+    font-size: 1.1rem !important;
+    margin-top: 16px !important;
+    padding: 0 12px;
+    line-height: 1.4;
   }
 
   #qrModalCard {
     min-width: 0;
-    width: 90vw;
-    max-width: 350px;
-    padding: 24px 16px;
+    width: 95vw;
+    max-width: 95vw;
+    padding: 30px 20px;
   }
 
   #modalQrImg {
-    width: 200px !important;
-    height: 200px !important;
+    width: 250px !important;
+    height: 250px !important;
     max-width: none;
-    padding: 12px;
+    padding: 16px;
   }
 
   #modalQrText {
-    font-size: 1rem;
-    padding: 0 8px;
+    font-size: 1.2rem;
+    padding: 0 12px;
+    line-height: 1.4;
   }
 
   #modalDownload,
   #modalDelete {
-    padding: 12px 16px;
-    font-size: 1rem;
-    margin: 6px;
+    padding: 16px 20px;
+    font-size: 1.2rem;
+    margin: 8px;
+    min-height: 52px;
   }
 
   #closeModal {
-    font-size: 1.8rem;
-    top: 8px;
-    right: 12px;
+    font-size: 2.2rem;
+    top: 10px;
+    right: 15px;
+    padding: 5px;
+  }
+}
+
+@media (max-width: 400px) {
+  body {
+    padding: 0 16px;
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+
+  #qrcode img,
+  #qrcode canvas {
+    min-width: 200px;
+    max-width: 280px;
+  }
+
+  .saved-qr img {
+    width: 180px !important;
+    height: 180px !important;
+  }
+
+  #modalQrImg {
+    width: 220px !important;
+    height: 220px !important;
   }
 }
