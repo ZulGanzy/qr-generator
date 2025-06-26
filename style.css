@@ -437,3 +437,31 @@ button:hover {
     padding: 10px 16px;
   }
 }
+
+/* FOOTER BANG */
+footer {
+  /* background: #222; */
+  color: #fff;
+  margin: 60px 0px 10px 0px;
+  text-align: center;
+}
+.footer-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+.footer-links a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover {
+  color: #f39c12;
+}
