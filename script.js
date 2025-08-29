@@ -2,35 +2,111 @@ const form = document.getElementById("qrForm");
 const qrcodeDiv = document.getElementById("qrcode");
 const downloadBtn = document.getElementById("downloadBtn");
 const saveBtn = document.getElementById("saveBtn");
+const previewBtn = document.getElementById("previewBtn");
 const savedQrsDiv = document.getElementById("savedQrs");
+const generateBtn = document.querySelector(".generate-btn");
 
-window.addEventListener("DOMContentLoaded", showSavedQrs);
+window.addEventListener("DOMContentLoaded", function() {
+  const qrModal = document.getElementById("qrModal");
+  if (qrModal) {
+    qrModal.style.display = "none";
+  }
+  showSavedQrs();
+});
+
+function showNotification(message, type = "info") {
+  const notification = document.createElement("div");
+  notification.className = `notification notification-${type}`;
+  
+  const iconClass = type === "success" ? "fa-check-circle" : 
+                   type === "warning" ? "fa-exclamation-triangle" : "fa-info-circle";
+  
+  notification.innerHTML = `
+    <i class="fas ${iconClass} notification-icon"></i>
+    <span class="notification-text">${message}</span>
+  `;
+
+  document.body.appendChild(notification);
+
+  setTimeout(() => {
+    notification.classList.add("show");
+  }, 100);
+
+  setTimeout(() => {
+    notification.classList.remove("show");
+    setTimeout(() => {
+      document.body.removeChild(notification);
+    }, 300);
+  }, 3000);
+}
+
+function setLoadingState(isLoading) {
+  if (isLoading) {
+    generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Generating...</span>';
+    generateBtn.classList.add('loading');
+    generateBtn.disabled = true;
+  } else {
+    generateBtn.innerHTML = '<i class="fas fa-magic"></i><span>Generate QR Code</span>';
+    generateBtn.classList.remove('loading');
+    generateBtn.disabled = false;
+  }
+}
 
 form.addEventListener("submit", function (e) {
   e.preventDefault();
   const text = document.getElementById("text").value.trim();
+
+  if (!text) {
+    showNotification("Please enter some text to generate QR code", "warning");
+    return;
+  }
+
   qrcodeDiv.innerHTML = "";
+  qrcodeDiv.classList.remove('success-animation');
+  previewBtn.style.display = "none";
   downloadBtn.style.display = "none";
   saveBtn.style.display = "none";
-  if (text) {
+
+  setLoadingState(true);
+
+  setTimeout(() => {
     new QRCode(qrcodeDiv, {
       text: text,
       width: 220,
       height: 220,
-      colorDark: "#181a20",
+      colorDark: "#000000",
       colorLight: "#ffffff",
       correctLevel: QRCode.CorrectLevel.H,
     });
+
     setTimeout(() => {
-      downloadBtn.style.display = "inline-block";
-      saveBtn.style.display = "inline-block";
-    }, 200);
-  }
+      const qrImg = qrcodeDiv.querySelector("img");
+      const qrCanvas = qrcodeDiv.querySelector("canvas");
+      
+      if (qrImg) {
+        qrImg.style.backgroundColor = "white";
+        qrImg.style.border = "1px solid #e5e7eb";
+      }
+      
+      if (qrCanvas) {
+        qrCanvas.style.backgroundColor = "white";
+        qrCanvas.style.border = "1px solid #e5e7eb";
+      }
+    }, 100);
+
+    setTimeout(() => {
+      setLoadingState(false);
+      qrcodeDiv.classList.add('success-animation');
+      previewBtn.style.display = "inline-flex";
+      downloadBtn.style.display = "inline-flex";
+      saveBtn.style.display = "inline-flex";
+      showNotification("QR Code generated successfully!", "success");
+    }, 500);
+  }, 800);
 });
 
 downloadBtn.addEventListener("click", function () {
   const text = document.getElementById("text").value.trim();
-  // Fungsi untuk membuat nama file yang aman
   function safeFileName(str) {
     return (
       str
@@ -46,7 +122,7 @@ downloadBtn.addEventListener("click", function () {
     const tempImg = new window.Image();
     tempImg.src = img.src;
     tempImg.onload = function () {
-      const padding = 10; // px
+      const padding = 10;
       const size = tempImg.width + padding * 2;
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = size;
@@ -65,7 +141,7 @@ downloadBtn.addEventListener("click", function () {
     };
     return;
   } else if (canvas) {
-    const padding = 32; // px
+    const padding = 32;
     const size = canvas.width + padding * 2;
     const tempCanvas = document.createElement("canvas");
     tempCanvas.width = size;
@@ -91,40 +167,137 @@ saveBtn.addEventListener("click", function () {
   const img = qrcodeDiv.querySelector("img");
   const canvas = qrcodeDiv.querySelector("canvas");
   let url;
+  
   if (img) {
-    url = img.src;
+    const tempCanvas = document.createElement("canvas");
+    const ctx = tempCanvas.getContext("2d");
+    const padding = 16;
+    tempCanvas.width = img.width + padding * 2;
+    tempCanvas.height = img.height + padding * 2;
+    
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+    
+    ctx.drawImage(img, padding, padding);
+    url = tempCanvas.toDataURL("image/png");
   } else if (canvas) {
-    url = canvas.toDataURL("image/png");
+    const padding = 16;
+    const size = canvas.width + padding * 2;
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = size;
+    tempCanvas.height = size;
+    const ctx = tempCanvas.getContext("2d");
+    
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, size, size);
+    
+    ctx.drawImage(canvas, padding, padding);
+    url = tempCanvas.toDataURL("image/png");
   }
+  
   if (url && text) {
     let saved = JSON.parse(localStorage.getItem("savedQrs") || "[]");
     if (!saved.some((qr) => qr.text === text)) {
       saved.push({ text, url });
       localStorage.setItem("savedQrs", JSON.stringify(saved));
       showSavedQrs();
+      showNotification("QR Code saved successfully!", "success");
     } else {
-      alert("QR sudah pernah disimpan.");
+      showNotification("This QR Code has already been saved", "warning");
     }
+  } else {
+    showNotification("Please generate a QR Code first", "warning");
+  }
+});
+
+previewBtn.addEventListener("click", function () {
+  const text = document.getElementById("text").value.trim();
+  const img = qrcodeDiv.querySelector("img");
+  const canvas = qrcodeDiv.querySelector("canvas");
+  
+  if (img || canvas) {
+    const previewModal = document.createElement("div");
+    previewModal.className = "modal";
+    previewModal.innerHTML = `
+      <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+          <h3 class="modal-title">
+            <i class="fas fa-eye"></i>
+            QR Code Preview
+          </h3>
+          <button class="close-modal" onclick="this.closest('.modal').style.display='none'">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-qr-display" style="text-align: center; padding: 20px;">
+          <div id="previewQrContainer"></div>
+          <div style="margin-top: 16px; color: var(--text-secondary); font-size: 0.875rem; word-break: break-all;">
+            ${text}
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(previewModal);
+    previewModal.style.display = "flex";
+    
+    setTimeout(() => {
+      new QRCode(document.getElementById("previewQrContainer"), {
+        text: text,
+        width: 300,
+        height: 300,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H,
+      });
+      
+      setTimeout(() => {
+        const previewImg = document.querySelector("#previewQrContainer img");
+        const previewCanvas = document.querySelector("#previewQrContainer canvas");
+        
+        if (previewImg) {
+          previewImg.style.backgroundColor = "white";
+          previewImg.style.border = "2px solid #e5e7eb";
+        }
+        
+        if (previewCanvas) {
+          previewCanvas.style.backgroundColor = "white";
+          previewCanvas.style.border = "2px solid #e5e7eb";
+        }
+      }, 100);
+    }, 100);
+  } else {
+    showNotification("Please generate a QR Code first", "warning");
   }
 });
 
 function showSavedQrs() {
-  let saved = JSON.parse(localStorage.getItem("savedQrs") || "[]");
-  savedQrsDiv.innerHTML = "";
-  if (saved.length === 0) {
-    savedQrsDiv.innerHTML = "<p style='color:#888;'>Belum ada QR code tersimpan.</p>";
-    return;
+  try {
+    let saved = JSON.parse(localStorage.getItem("savedQrs") || "[]");
+    savedQrsDiv.innerHTML = "";
+    if (saved.length === 0) {
+      savedQrsDiv.innerHTML = "<p>No saved QR codes yet.</p>";
+      return;
+    }
+    saved.forEach((qr, index) => {
+      if (!qr.url || !qr.text) {
+        console.warn(`Invalid QR data at index ${index}:`, qr);
+        return;
+      }
+      
+      const wrap = document.createElement("div");
+      wrap.className = "saved-qr";
+      wrap.innerHTML = `
+        <img src="${qr.url}" alt="QR Code" width="120" height="120" onerror="this.style.display='none'" onload="this.style.backgroundColor='white'; this.style.border='1px solid #d1d5db'; this.style.borderRadius='4px'">
+        <div>${qr.text}</div>
+      `;
+      wrap.onclick = () => openQrModal(qr);
+      savedQrsDiv.appendChild(wrap);
+    });
+  } catch (error) {
+    console.error("Error loading saved QR codes:", error);
+    savedQrsDiv.innerHTML = "<p>Error loading saved QR codes.</p>";
   }
-  saved.forEach((qr) => {
-    const wrap = document.createElement("div");
-    wrap.className = "saved-qr";
-    wrap.innerHTML = `
-      <img src="${qr.url}" alt="qr" width="120" height="120">
-      <div style="margin-top:8px; color:#aaa; font-size:0.9em; word-break:break-all;">${qr.text}</div>
-    `;
-    wrap.onclick = () => openQrModal(qr);
-    savedQrsDiv.appendChild(wrap);
-  });
 }
 
 const qrModal = document.getElementById("qrModal");
@@ -138,9 +311,32 @@ let currentModalQr = null;
 
 function openQrModal(qr) {
   currentModalQr = qr;
+  
+  const qrContainer = document.querySelector('.qr-preview-container');
+  if (qrContainer) {
+    qrContainer.classList.add('modal-loading');
+  }
+  
   modalQrImg.src = qr.url;
   modalQrText.textContent = qr.text;
   qrModal.style.display = "flex";
+  
+  modalQrImg.onload = function() {
+    modalQrImg.style.backgroundColor = "white";
+    modalQrImg.style.border = "1px solid #d1d5db";
+    modalQrImg.style.borderRadius = "4px";
+    
+    if (qrContainer) {
+      qrContainer.classList.remove('modal-loading');
+    }
+  };
+  
+  modalQrImg.onerror = function() {
+    if (qrContainer) {
+      qrContainer.classList.remove('modal-loading');
+    }
+    showNotification("Failed to load QR code image", "warning");
+  };
 }
 
 closeModal.onclick = function () {
@@ -150,7 +346,6 @@ closeModal.onclick = function () {
 
 modalDownload.onclick = function () {
   if (currentModalQr) {
-    // Fungsi untuk membuat nama file yang aman
     function safeFileName(str) {
       return (
         str
@@ -176,6 +371,7 @@ modalDelete.onclick = function () {
     showSavedQrs();
     qrModal.style.display = "none";
     currentModalQr = null;
+    showNotification("QR Code deleted successfully!", "success");
   }
 };
 
