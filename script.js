@@ -6,12 +6,23 @@ const previewBtn = document.getElementById("previewBtn");
 const savedQrsDiv = document.getElementById("savedQrs");
 const generateBtn = document.querySelector(".generate-btn");
 
+let isGenerating = false; // Flag to prevent double generation
+
 window.addEventListener("DOMContentLoaded", function() {
   const qrModal = document.getElementById("qrModal");
   if (qrModal) {
     qrModal.style.display = "none";
   }
   showSavedQrs();
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlParam = urlParams.get('url') || urlParams.get('text');
+  if (urlParam) {
+    document.getElementById("text").value = urlParam;
+    setTimeout(() => {
+      generateQRCode(urlParam);
+    }, 500);
+  }
 });
 
 function showNotification(message, type = "info") {
@@ -52,14 +63,12 @@ function setLoadingState(isLoading) {
   }
 }
 
-form.addEventListener("submit", function (e) {
-  e.preventDefault();
-  const text = document.getElementById("text").value.trim();
-
-  if (!text) {
-    showNotification("Please enter some text to generate QR code", "warning");
+function generateQRCode(text) {
+  if (!text || isGenerating) {
     return;
   }
+  
+  isGenerating = true;
 
   qrcodeDiv.innerHTML = "";
   qrcodeDiv.classList.remove('success-animation');
@@ -101,8 +110,20 @@ form.addEventListener("submit", function (e) {
       downloadBtn.style.display = "inline-flex";
       saveBtn.style.display = "inline-flex";
       showNotification("QR Code generated successfully!", "success");
+      isGenerating = false; // Reset flag after completion
     }, 500);
   }, 800);
+}
+
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+  const text = document.getElementById("text").value.trim();
+  generateQRCode(text);
+  
+  // Update URL with the generated text
+  const url = new URL(window.location);
+  url.searchParams.set('url', text);
+  window.history.pushState({}, '', url);
 });
 
 downloadBtn.addEventListener("click", function () {
