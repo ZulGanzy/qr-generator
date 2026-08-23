@@ -760,3 +760,23 @@ function showNotification(message, type = "info") {
   setTimeout(() => n.classList.add("show"), 100);
   setTimeout(() => { n.classList.remove("show"); setTimeout(() => { if (n.parentNode) n.remove(); }, 300); }, 3000);
 }
+
+/* ===== FAQ Accordion ===== */
+(function () {
+  document.querySelectorAll(".faq").forEach(function (faq) {
+    faq.querySelectorAll(".faq-q").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var item = btn.closest(".faq-item");
+        var wasOpen = item.classList.contains("open");
+        faq.querySelectorAll(".faq-item.open").forEach(function (o) {
+          o.classList.remove("open");
+          o.querySelector(".faq-q").setAttribute("aria-expanded", "false");
+        });
+        if (!wasOpen) {
+          item.classList.add("open");
+          btn.setAttribute("aria-expanded", "true");
+        }
+      });
+    });
+  });
+})();
