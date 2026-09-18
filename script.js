@@ -47,7 +47,7 @@ const stylingBody = document.getElementById("stylingBody");
 let isGenerating = false;
 let currentQrCode = null;
 let currentText = "";
-let logoDataUrl = null;
+let logoDataUrl = "logo.svg";
 let activePreviewModal = null;
 
 const STORAGE_KEY = "qr_styling_config";
@@ -56,9 +56,9 @@ const DEFAULTS = {
   csColor: "#000000",
   cdColor: "#000000",
   bgColor: "#ffffff",
-  dotStyle: "square",
-  cornerSquare: "square",
-  cornerDot: "square",
+  dotStyle: "rounded",
+  cornerSquare: "extra-rounded",
+  cornerDot: "dot",
   qrSize: 250,
   errorCorrection: "H",
   downloadQuality: 2,
@@ -166,13 +166,11 @@ function applyStylingConfig(cfg) {
   }
 
   // Logo
-  if (cfg.logo) {
-    logoDataUrl = cfg.logo;
-    logoPreview.src = logoDataUrl;
-    logoPreviewWrap.style.display = "block";
-    logoUploadBtn.style.display = "none";
-    logoSlidersWrap.style.display = "grid";
-  }
+  logoDataUrl = cfg.logo || "logo.svg";
+  logoPreview.src = logoDataUrl;
+  logoPreviewWrap.style.display = "block";
+  logoUploadBtn.style.display = "none";
+  logoSlidersWrap.style.display = "grid";
 
   // Logo sliders
   if (cfg.logoSize) {
@@ -197,7 +195,7 @@ window.addEventListener("DOMContentLoaded", function () {
   const qrModal = document.getElementById("qrModal");
   if (qrModal) qrModal.style.display = "none";
 
-  applyStylingConfig(loadStylingConfig());
+  applyStylingConfig(loadStylingConfig() || {});
   showSavedQrs();
   initStylingPanel();
 
@@ -361,9 +359,10 @@ function initStylingPanel() {
     qrBgColor.value = DEFAULTS.bgColor;
     qrBgHex.value = DEFAULTS.bgColor;
 
-    [dotStyleOptions, cornerSquareOptions, cornerDotOptions].forEach(g => {
-      g.querySelectorAll(".style-opt").forEach(b => b.classList.remove("active"));
-      g.querySelector('[data-value="square"]').classList.add("active");
+    [["dotStyleOptions", DEFAULTS.dotStyle], ["cornerSquareOptions", DEFAULTS.cornerSquare], ["cornerDotOptions", DEFAULTS.cornerDot]].forEach(([id, val]) => {
+      const container = document.getElementById(id);
+      container.querySelectorAll(".style-opt").forEach(b => b.classList.remove("active"));
+      container.querySelector(`[data-value="${val}"]`).classList.add("active");
     });
 
     qrSize.value = DEFAULTS.qrSize;
@@ -375,11 +374,11 @@ function initStylingPanel() {
     document.querySelectorAll(".dl-opt").forEach(b => b.classList.remove("active"));
     document.querySelector('.dl-opt[data-value="2"]').classList.add("active");
 
-    logoDataUrl = null;
-    logoPreview.src = "";
-    logoPreviewWrap.style.display = "none";
-    logoUploadBtn.style.display = "flex";
-    logoSlidersWrap.style.display = "none";
+    logoDataUrl = "logo.svg";
+    logoPreview.src = "logo.svg";
+    logoPreviewWrap.style.display = "block";
+    logoUploadBtn.style.display = "none";
+    logoSlidersWrap.style.display = "grid";
     logoUpload.value = "";
     logoSizeSlider.value = DEFAULTS.logoSize;
     logoSizeVal.textContent = DEFAULTS.logoSize + "%";
