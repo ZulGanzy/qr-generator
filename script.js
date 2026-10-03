@@ -765,6 +765,47 @@ function proceedGenerate(text, pushHistory) {
   }
 }
 
+// ── Permanent-or-temporary modal ───────────────────────────
+
+function showPermModal(shortUrl, original) {
+  const modal = document.getElementById("permModal");
+  if (!modal) { proceedGenerate(shortUrl, true); return; }
+  modal.style.display = "flex";
+
+  document.getElementById("permYesBtn").onclick = function () {
+    try {
+      localStorage.setItem("qr_pending", JSON.stringify({ short: shortUrl, original: original }));
+    } catch (e) {}
+    const back = location.origin + location.pathname + "?restored=1";
+    location.href = "https://link.joulezy.net/login?redirect_url=" + encodeURIComponent(back);
+  };
+
+  document.getElementById("permNoBtn").onclick = function () {
+    modal.style.display = "none";
+    shortenerToken = null;
+    try {
+      localStorage.removeItem("qr_shorten_token");
+      localStorage.removeItem("jlstnr_token");
+    } catch (e) {}
+    proceedGenerate(shortUrl, true);
+  };
+}
+
+// On return from login, regenerate QR from the pending short link
+(function restorePending() {
+  try {
+    const pending = localStorage.getItem("qr_pending");
+    if (!pending) return;
+    localStorage.removeItem("qr_pending");
+    const data = JSON.parse(pending);
+    const input = document.getElementById("text");
+    if (input) input.value = data.short;
+    showShortenNotice(data.short, data.original);
+    proceedGenerate(data.short, true);
+    showNotification("Link sudah permanen — QR di-generate ulang", "success");
+  } catch (e) {}
+})();
+
 form.addEventListener("submit", function (e) {
   e.preventDefault();
   const text = document.getElementById("text").value.trim();
@@ -777,15 +818,20 @@ form.addEventListener("submit", function (e) {
     const cached = shortenedCache.get(text);
     if (cached) {
       showShortenNotice(cached, text);
-      proceedGenerate(cached, true);
+      document.getElementById("text").value = cached;
+      showPermModal(cached, text);
       return;
     }
     showLengthWarning(text.length);
     shortenYesBtn.onclick = async function () {
       hideLengthWarning();
       const shortUrl = await shortenUrl(text);
-      if (shortUrl) document.getElementById("text").value = shortUrl;
-      proceedGenerate(shortUrl || text, true);
+      if (shortUrl) {
+        document.getElementById("text").value = shortUrl;
+        showPermModal(shortUrl, text);
+      } else {
+        proceedGenerate(text, true);
+      }
     };
     shortenNoBtn.onclick = function () {
       hideLengthWarning();

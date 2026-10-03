@@ -1690,3 +1690,61 @@ input:focus-visible {
   .seo-content > h2, .faq > h2 { font-size: 1.25rem; }
   .seo-content ul { grid-template-columns: 1fr; }
 }
+
+/* ── Permanent-or-temporary modal ─────────────────────────── */
+.perm-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 27, 36, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 20px;
+}
+
+.perm-card {
+  background: #fff;
+  border: 3px solid var(--toon-ink);
+  border-radius: 18px;
+  box-shadow: 6px 6px 0 var(--toon-ink);
+  max-width: 440px;
+  width: 100%;
+  padding: 24px;
+}
+
+.perm-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.perm-card p {
+  margin: 0 0 18px;
+  font-size: 0.9rem;
+  color: var(--toon-muted, #555);
+  line-height: 1.5;
+}
+
+.perm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.perm-btn {
+  border: 2.5px solid var(--toon-ink);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--toon-ink);
+  transition: transform 0.15s ease;
+}
+
+.perm-btn:hover { transform: translate(-1px, -1px); }
+
+.perm-yes { background: #ffd93d; color: var(--toon-ink); }
+.perm-no { background: #fff; color: var(--toon-ink); }
