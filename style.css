@@ -1748,3 +1748,23 @@ input:focus-visible {
 
 .perm-yes { background: #ffd93d; color: var(--toon-ink); }
 .perm-no { background: #fff; color: var(--toon-ink); }
+
+/* ── Long-link warning as modal ───────────────────────────── */
+.length-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 27, 36, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 20px;
+}
+
+.length-modal .length-warning {
+  max-width: 460px;
+  width: 100%;
+  background: #fff4e6;
+  margin-bottom: 0;
+  box-shadow: 6px 6px 0 var(--toon-ink);
+}

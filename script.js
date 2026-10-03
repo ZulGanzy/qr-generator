@@ -701,14 +701,17 @@ function isShortenerUrl(text) {
 }
 
 function hideLengthWarning() {
+  const lm = document.getElementById("lengthModal");
+  if (lm) lm.style.display = "none";
   if (lengthWarning) lengthWarning.style.display = "none";
 }
 
 function showLengthWarning(charCount) {
   if (!lengthWarning) return;
   lengthWarnCount.textContent = charCount;
+  const lm2 = document.getElementById("lengthModal");
+  if (lm2) lm2.style.display = "flex";
   lengthWarning.style.display = "flex";
-  lengthWarning.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function hideShortenNotice() {
