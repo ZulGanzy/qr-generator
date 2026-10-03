@@ -776,7 +776,7 @@ function showPermModal(shortUrl, original) {
     try {
       localStorage.setItem("qr_pending", JSON.stringify({ short: shortUrl, original: original }));
     } catch (e) {}
-    const back = location.origin + location.pathname + "?restored=1";
+    const back = "https://link.joulezy.net/dashboard?return=" + encodeURIComponent(location.origin + location.pathname + "?restored=1");
     location.href = "https://link.joulezy.net/login?redirect_url=" + encodeURIComponent(back);
   };
 
