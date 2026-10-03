@@ -1028,7 +1028,13 @@ function showNotification(message, type = "info") {
   n.className = `notification notification-${type}`;
   const icon = type === "success" ? "fa-check-circle" : type === "warning" ? "fa-exclamation-triangle" : "fa-info-circle";
   n.innerHTML = `<i class="fas ${icon} notification-icon"></i><span class="notification-text">${message}</span>`;
-  document.body.appendChild(n);
+  let stack = document.getElementById("toast-stack");
+  if (!stack) {
+    stack = document.createElement("div");
+    stack.id = "toast-stack";
+    document.body.appendChild(stack);
+  }
+  stack.prepend(n);
   setTimeout(() => n.classList.add("show"), 100);
   setTimeout(() => { n.classList.remove("show"); setTimeout(() => { if (n.parentNode) n.remove(); }, 300); }, 3000);
 }
