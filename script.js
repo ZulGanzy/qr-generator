@@ -782,10 +782,19 @@ function showPermModal(shortUrl, original) {
 
   document.getElementById("permNoBtn").onclick = function () {
     modal.style.display = "none";
+    const oldToken = shortenerToken;
     shortenerToken = null;
     try {
       localStorage.removeItem("qr_shorten_token");
       localStorage.removeItem("jlstnr_token");
+    } catch (e) {}
+    try {
+      fetch(SHORTENER_BASE + "/api/token/revoke", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: oldToken }),
+      }).catch(function () {});
     } catch (e) {}
     proceedGenerate(shortUrl, true);
   };
