@@ -3,7 +3,7 @@ name: QR Code Generator
 description: A web-based QR code generator with advanced styling customization — colors, dot shapes, corner styles, error correction levels, logo embedding, and adjustable download quality. Built with a clean dark-themed responsive UI.
 image: /image.png
 date: 2025
-website: https://qr.joulezy.tech
+website: https://qr.joulezy.net
 techStack:
   - HTML
   - CSS
@@ -13,6 +13,8 @@ techStack:
   - Font Awesome
 features:
   - Generate QR codes from text or URL
+  - One-click style presets (Classic, Midnight, Ocean, Forest, Sunset, Lavender, Ruby, Coffee, Neon, Mono Sharp) with live mini-QR previews
+  - Long-URL detection with optional shortening via link.joulezy.net (guest links last 24 hours, upsell to login for permanent links)
   - Customize QR dot styles (square, rounded, dots, extra-rounded, classy, classy-rounded)
   - Customize corner square and corner dot styles
   - Full color customization for dots, corners, and background

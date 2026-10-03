@@ -63,6 +63,45 @@
           </div>
         </form>
 
+        <div class="length-warning" id="lengthWarning" style="display: none;">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div class="length-warning-body">
+            <strong>Link kamu terlalu panjang (<span id="lengthWarnCount"></span> karakter)</strong>
+            <span>QR-nya bakal padat dan sulit dibaca scanner. Mau dipersingkat pakai link.joulezy.net?</span>
+          </div>
+          <div class="length-warning-actions">
+            <button type="button" class="lw-btn lw-yes" id="shortenYesBtn">
+              <i class="fas fa-check"></i>
+              <span>Ya, persingkat</span>
+              <i class="fas fa-spinner fa-spin lw-loading" id="shortenLoading" style="display: none;"></i>
+            </button>
+            <button type="button" class="lw-btn lw-no" id="shortenNoBtn">Lanjut pakai URL asli</button>
+          </div>
+        </div>
+
+        <div class="shorten-notice" id="shortenNotice" style="display: none;">
+          <div class="shorten-notice-main">
+            <i class="fas fa-check-circle"></i>
+            <span>Dipersingkat jadi <a id="shortUrlLink" target="_blank" rel="noopener noreferrer"></a></span>
+            <button type="button" class="short-copy" id="shortUrlCopy" title="Copy short link">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+          <div class="shorten-notice-warn">
+            <i class="fas fa-clock"></i>
+            <span>Link pendek ini cuma bertahan <strong>24 jam</strong>. <a href="https://link.joulezy.net/login" target="_blank" rel="noopener noreferrer"><strong>Login untuk link permanen</strong></a></span>
+          </div>
+        </div>
+
+        <div class="presets-section">
+          <div class="presets-header">
+            <i class="fas fa-swatchbook"></i>
+            <span>Style Presets</span>
+            <span class="presets-hint">click to apply</span>
+          </div>
+          <div class="presets-grid" id="presetsGrid"></div>
+        </div>
+
         <div class="workspace">
           <div class="styling-panel">
             <button type="button" class="styling-toggle" id="stylingToggle">
@@ -343,6 +382,7 @@
 
       <h3>Customization Options</h3>
       <ul>
+        <li><strong>Style Presets:</strong> One-click curated looks (Midnight, Ocean, Forest, Sunset, Neon and more) with live previews</li>
         <li><strong>Dot Styles:</strong> Square, Rounded, Dots, Extra Rounded, Classy, Classy Rounded</li>
         <li><strong>Corner Styles:</strong> Square, Dot, Extra Rounded corners with independent color control</li>
         <li><strong>Colors:</strong> Full color picker for dots, corner squares, corner dots, and background</li>

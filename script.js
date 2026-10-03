@@ -43,12 +43,31 @@ const logoSlidersWrap = document.getElementById("logoSlidersWrap");
 const resetStyleBtn = document.getElementById("resetStyleBtn");
 const stylingToggle = document.getElementById("stylingToggle");
 const stylingBody = document.getElementById("stylingBody");
+const presetsGrid = document.getElementById("presetsGrid");
+
+// ── Shortener elements ──────────────────────────────────────
+const lengthWarning = document.getElementById("lengthWarning");
+const lengthWarnCount = document.getElementById("lengthWarnCount");
+const shortenYesBtn = document.getElementById("shortenYesBtn");
+const shortenNoBtn = document.getElementById("shortenNoBtn");
+const shortenNotice = document.getElementById("shortenNotice");
+const shortUrlLink = document.getElementById("shortUrlLink");
+const shortUrlCopy = document.getElementById("shortUrlCopy");
+const shortenLoading = document.getElementById("shortenLoading");
 
 let isGenerating = false;
 let currentQrCode = null;
 let currentText = "";
 let logoDataUrl = "logo.svg";
 let activePreviewModal = null;
+let activePresetId = null;
+let applyingPreset = false;
+let shortenerToken = null;
+const shortenedCache = new Map();
+try { shortenerToken = localStorage.getItem("qr_shorten_token"); } catch (e) {}
+
+const SHORTENER_BASE = "https://link.joulezy.net";
+const SHORTEN_THRESHOLD = 60;
 
 const STORAGE_KEY = "qr_styling_config";
 const DEFAULTS = {
@@ -66,6 +85,62 @@ const DEFAULTS = {
   logoMargin: 4,
   dlMargin: 2,
 };
+
+// ── Style Presets ───────────────────────────────────────────
+// Each preset applies colors + dot/corner shapes. Logo, size, error
+// correction and download settings are left untouched.
+const PRESETS = [
+  {
+    id: "classic", name: "Classic",
+    dotColor: "#1f1b24", csColor: "#1f1b24", cdColor: "#1f1b24", bgColor: "#ffffff",
+    dotStyle: "rounded", cornerSquare: "extra-rounded", cornerDot: "dot",
+  },
+  {
+    id: "midnight", name: "Midnight",
+    dotColor: "#ffffff", csColor: "#4cc9f0", cdColor: "#ffd93d", bgColor: "#1f1b24",
+    dotStyle: "dots", cornerSquare: "extra-rounded", cornerDot: "dot",
+  },
+  {
+    id: "ocean", name: "Ocean",
+    dotColor: "#0077b6", csColor: "#023e8a", cdColor: "#03045e", bgColor: "#caf0f8",
+    dotStyle: "rounded", cornerSquare: "square", cornerDot: "square",
+  },
+  {
+    id: "forest", name: "Forest",
+    dotColor: "#2d6a4f", csColor: "#1b4332", cdColor: "#40916c", bgColor: "#d8f3dc",
+    dotStyle: "extra-rounded", cornerSquare: "extra-rounded", cornerDot: "dot",
+  },
+  {
+    id: "sunset", name: "Sunset",
+    dotColor: "#d00000", csColor: "#e85d04", cdColor: "#ffba08", bgColor: "#ffe8d6",
+    dotStyle: "classy-rounded", cornerSquare: "extra-rounded", cornerDot: "dot",
+  },
+  {
+    id: "lavender", name: "Lavender",
+    dotColor: "#7b2cbf", csColor: "#5a189a", cdColor: "#c77dff", bgColor: "#f3e8ff",
+    dotStyle: "dots", cornerSquare: "dot", cornerDot: "dot",
+  },
+  {
+    id: "ruby", name: "Ruby",
+    dotColor: "#9d0208", csColor: "#6a040f", cdColor: "#d00000", bgColor: "#fff0f0",
+    dotStyle: "square", cornerSquare: "square", cornerDot: "square",
+  },
+  {
+    id: "coffee", name: "Coffee",
+    dotColor: "#6f4e37", csColor: "#4a2c2a", cdColor: "#8a5a44", bgColor: "#f5e6d3",
+    dotStyle: "classy", cornerSquare: "extra-rounded", cornerDot: "dot",
+  },
+  {
+    id: "neon", name: "Neon",
+    dotColor: "#00f5d4", csColor: "#00bbf9", cdColor: "#c77dff", bgColor: "#0b0b16",
+    dotStyle: "dots", cornerSquare: "extra-rounded", cornerDot: "dot",
+  },
+  {
+    id: "mono", name: "Mono Sharp",
+    dotColor: "#000000", csColor: "#000000", cdColor: "#000000", bgColor: "#ffffff",
+    dotStyle: "square", cornerSquare: "square", cornerDot: "square",
+  },
+];
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -99,6 +174,7 @@ function saveStylingConfig() {
     logoSize: parseInt(logoSizeSlider.value) || DEFAULTS.logoSize,
     logoMargin: parseInt(logoMarginSlider.value) || DEFAULTS.logoMargin,
     dlMargin: parseInt(dlMargin.value) || DEFAULTS.dlMargin,
+    preset: activePresetId,
   };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
@@ -187,6 +263,9 @@ function applyStylingConfig(cfg) {
     dlMargin.value = cfg.dlMargin;
     dlMarginVal.textContent = cfg.dlMargin + "px";
   }
+
+  // Preset
+  setActivePreset(cfg.preset || null);
 }
 
 // ── Init ─────────────────────────────────────────────────────
@@ -195,6 +274,7 @@ window.addEventListener("DOMContentLoaded", function () {
   const qrModal = document.getElementById("qrModal");
   if (qrModal) qrModal.style.display = "none";
 
+  renderPresets();
   applyStylingConfig(loadStylingConfig() || {});
   showSavedQrs();
   initStylingPanel();
@@ -206,6 +286,79 @@ window.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => generateQRCode(urlParam), 500);
   }
 });
+
+// ── Style Presets ─────────────────────────────────────────────
+
+function setStyleActive(containerId, value) {
+  const container = document.getElementById(containerId);
+  if (!container || !value) return;
+  container.querySelectorAll(".style-opt").forEach(b => b.classList.remove("active"));
+  const btn = container.querySelector(`[data-value="${value}"]`);
+  if (btn) btn.classList.add("active");
+}
+
+function setColorInputs(colorEl, hexEl, value) {
+  colorEl.value = value;
+  hexEl.value = value;
+}
+
+function renderPresets() {
+  if (!presetsGrid) return;
+  presetsGrid.innerHTML = "";
+
+  PRESETS.forEach(preset => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "preset-card";
+    card.dataset.preset = preset.id;
+    card.title = "Apply " + preset.name + " preset";
+    card.innerHTML = '<div class="preset-thumb"></div><span class="preset-name">' + preset.name + "</span>";
+    card.addEventListener("click", () => applyPreset(preset));
+    presetsGrid.appendChild(card);
+
+    // Render a real mini QR with the preset styling (no logo) as the thumbnail
+    const thumb = card.querySelector(".preset-thumb");
+    const qr = new QRCodeStyling({
+      width: 64,
+      height: 64,
+      type: "canvas",
+      data: "https://joulezy.net",
+      dotsOptions: { color: preset.dotColor, type: preset.dotStyle },
+      cornersSquareOptions: { color: preset.csColor, type: preset.cornerSquare },
+      cornersDotOptions: { color: preset.cdColor, type: preset.cornerDot },
+      backgroundOptions: { color: preset.bgColor },
+      qrOptions: { errorCorrectionLevel: "Q" },
+    });
+    qr.append(thumb);
+  });
+}
+
+function setActivePreset(id) {
+  activePresetId = id || null;
+  document.querySelectorAll(".preset-card").forEach(c => {
+    c.classList.toggle("active", c.dataset.preset === id);
+  });
+}
+
+function applyPreset(preset) {
+  applyingPreset = true;
+
+  setColorInputs(qrDotColor, qrDotHex, preset.dotColor);
+  setColorInputs(qrCsColor, qrCsHex, preset.csColor);
+  setColorInputs(qrCdColor, qrCdHex, preset.cdColor);
+  setColorInputs(qrBgColor, qrBgHex, preset.bgColor);
+
+  setStyleActive("dotStyleOptions", preset.dotStyle);
+  setStyleActive("cornerSquareOptions", preset.cornerSquare);
+  setStyleActive("cornerDotOptions", preset.cornerDot);
+
+  setActivePreset(preset.id);
+
+  onStyleChange();
+  applyingPreset = false;
+
+  showNotification('Preset "' + preset.name + '" applied', "success");
+}
 
 // ── Styling Panel ────────────────────────────────────────────
 
@@ -388,6 +541,8 @@ function initStylingPanel() {
     dlMargin.value = DEFAULTS.dlMargin;
     dlMarginVal.textContent = DEFAULTS.dlMargin + "px";
 
+    setActivePreset(null);
+
     localStorage.removeItem(STORAGE_KEY);
     onStyleChange();
     showNotification("Styles reset to default", "info");
@@ -395,6 +550,7 @@ function initStylingPanel() {
 }
 
 function onStyleChange() {
+  if (!applyingPreset) setActivePreset(null);
   saveStylingConfig();
   regenerateWithNewStyle();
 }
@@ -538,16 +694,132 @@ function generateQRCode(text, isRestyle) {
   }, delay);
 }
 
-// ── Form Submit ─────────────────────────────────────────────
+// ── Form Submit (with long-URL check) ───────────────────────
+
+function isShortenerUrl(text) {
+  return text.startsWith(SHORTENER_BASE + "/");
+}
+
+function hideLengthWarning() {
+  if (lengthWarning) lengthWarning.style.display = "none";
+}
+
+function showLengthWarning(charCount) {
+  if (!lengthWarning) return;
+  lengthWarnCount.textContent = charCount;
+  lengthWarning.style.display = "flex";
+  lengthWarning.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function hideShortenNotice() {
+  if (shortenNotice) shortenNotice.style.display = "none";
+}
+
+function showShortenNotice(shortUrl, original) {
+  if (!shortenNotice) return;
+  shortUrlLink.textContent = shortUrl;
+  shortUrlLink.href = shortUrl;
+  shortenNotice.style.display = "flex";
+  shortenNotice.dataset.original = original;
+  shortenNotice.dataset.short = shortUrl;
+}
+
+async function shortenUrl(originalUrl) {
+  shortenYesBtn.disabled = true;
+  shortenNoBtn.disabled = true;
+  shortenLoading.style.display = "inline-block";
+
+  try {
+    const res = await fetch(SHORTENER_BASE + "/api/shorten", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: originalUrl, qrgen: true, ...(shortenerToken ? { token: shortenerToken } : {}) }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Shorten failed");
+    if (data.token) {
+      shortenerToken = data.token;
+      try { localStorage.setItem("qr_shorten_token", data.token); } catch (e) {}
+    }
+    showShortenNotice(SHORTENER_BASE + "/" + data.code, originalUrl);
+    shortenedCache.set(originalUrl, SHORTENER_BASE + "/" + data.code);
+    return SHORTENER_BASE + "/" + data.code;
+  } catch (err) {
+    console.error("Shorten failed:", err);
+    showNotification("Shortener unavailable, using original URL", "warning");
+    return null;
+  } finally {
+    shortenYesBtn.disabled = false;
+    shortenNoBtn.disabled = false;
+    shortenLoading.style.display = "none";
+  }
+}
+
+function proceedGenerate(text, pushHistory) {
+  generateQRCode(text);
+  if (pushHistory) {
+    const url = new URL(window.location);
+    url.searchParams.set("url", text);
+    window.history.pushState({}, "", url);
+  }
+}
 
 form.addEventListener("submit", function (e) {
   e.preventDefault();
   const text = document.getElementById("text").value.trim();
-  generateQRCode(text);
-  const url = new URL(window.location);
-  url.searchParams.set("url", text);
-  window.history.pushState({}, "", url);
+  if (!text) return;
+
+  hideLengthWarning();
+  hideShortenNotice();
+
+  if (text.length > SHORTEN_THRESHOLD && /^https?:\/\//i.test(text) && !isShortenerUrl(text)) {
+    const cached = shortenedCache.get(text);
+    if (cached) {
+      showShortenNotice(cached, text);
+      proceedGenerate(cached, true);
+      return;
+    }
+    showLengthWarning(text.length);
+    shortenYesBtn.onclick = async function () {
+      hideLengthWarning();
+      const shortUrl = await shortenUrl(text);
+      proceedGenerate(shortUrl || text, true);
+    };
+    shortenNoBtn.onclick = function () {
+      hideLengthWarning();
+      proceedGenerate(text, true);
+    };
+    return;
+  }
+
+  proceedGenerate(text, true);
 });
+
+// ── Short URL copy button ─────────────────────────────────────
+if (shortUrlCopy) {
+  shortUrlCopy.addEventListener("click", function () {
+    const link = shortUrlLink.textContent;
+    const done = () => showNotification("Short link copied!", "success");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(link).then(done).catch(() => fallbackCopy(link, done));
+    } else {
+      fallbackCopy(link, done);
+    }
+  });
+}
+
+function fallbackCopy(text, done) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); done(); } catch (e) {
+    showNotification("Copy failed", "warning");
+  }
+  ta.remove();
+}
 
 // ── Download ────────────────────────────────────────────────
 
@@ -654,8 +926,8 @@ previewBtn.addEventListener("click", function () {
           <i class="fas fa-times"></i>
         </button>
       </div>
-      <div class="modal-qr-display" style="text-align: center; padding: 20px;">
-        <div id="previewQrContainer"></div>
+      <div class="modal-qr-display">
+        <div class="qr-preview-container" id="previewQrContainer"></div>
         <div class="modal-qr-text">${text}</div>
       </div>
     </div>
