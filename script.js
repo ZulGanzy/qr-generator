@@ -783,6 +783,7 @@ form.addEventListener("submit", function (e) {
     shortenYesBtn.onclick = async function () {
       hideLengthWarning();
       const shortUrl = await shortenUrl(text);
+      if (shortUrl) document.getElementById("text").value = shortUrl;
       proceedGenerate(shortUrl || text, true);
     };
     shortenNoBtn.onclick = function () {
