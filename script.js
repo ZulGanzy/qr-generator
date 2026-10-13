@@ -1099,21 +1099,64 @@ function showNotification(message, type = "info") {
 }
 
 /* ===== FAQ Accordion ===== */
+/* ===== FAQ Accordion ===== */
 (function () {
+  var seq = 0;
+
+  function setOpen(item, open) {
+    var btn = item.querySelector(".faq-q");
+    var panel = item.querySelector(".faq-a");
+    if (!btn || !panel) return;
+    clearTimeout(panel._t);
+    if (open) {
+      panel.hidden = false;
+      void panel.offsetHeight; // reflow so the expand animates from collapsed
+      panel.style.maxHeight = panel.scrollHeight + "px";
+      btn.setAttribute("aria-expanded", "true");
+      item.classList.add("open");
+      return;
+    }
+    panel.style.maxHeight = panel.scrollHeight + "px";
+    void panel.offsetHeight;
+    panel.style.maxHeight = "0px";
+    btn.setAttribute("aria-expanded", "false");
+    item.classList.remove("open");
+    panel._t = setTimeout(function () {
+      if (btn.getAttribute("aria-expanded") === "false") panel.hidden = true;
+    }, 400);
+  }
+
   document.querySelectorAll(".faq").forEach(function (faq) {
-    faq.querySelectorAll(".faq-q").forEach(function (btn) {
+    faq.classList.add("faq-ready");
+    faq.querySelectorAll(".faq-item").forEach(function (item) {
+      var btn = item.querySelector(".faq-q");
+      var panel = item.querySelector(".faq-a");
+      if (!btn || !panel) return;
+      seq++;
+      var qId = "faq-q-" + seq;
+      var aId = "faq-a-" + seq;
+      btn.id = qId;
+      btn.setAttribute("aria-controls", aId);
+      panel.id = aId;
+      panel.setAttribute("role", "region");
+      panel.setAttribute("aria-labelledby", qId);
+      panel.hidden = true;
+      panel.style.maxHeight = "0px";
       btn.addEventListener("click", function () {
-        var item = btn.closest(".faq-item");
-        var wasOpen = item.classList.contains("open");
-        faq.querySelectorAll(".faq-item.open").forEach(function (o) {
-          o.classList.remove("open");
-          o.querySelector(".faq-q").setAttribute("aria-expanded", "false");
+        var isOpen = btn.getAttribute("aria-expanded") === "true";
+        faq.querySelectorAll(".faq-item.open").forEach(function (other) {
+          if (other !== item) setOpen(other, false);
         });
-        if (!wasOpen) {
-          item.classList.add("open");
-          btn.setAttribute("aria-expanded", "true");
-        }
+        setOpen(item, !isOpen);
       });
+    });
+  });
+
+  // re-measure open answers after a resize or orientation change
+  window.addEventListener("resize", function () {
+    document.querySelectorAll(".faq-item.open").forEach(function (item) {
+      var panel = item.querySelector(".faq-a");
+      if (panel) panel.style.maxHeight = panel.scrollHeight + "px";
     });
   });
 })();

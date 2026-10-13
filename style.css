@@ -1645,45 +1645,31 @@ input:focus-visible {
   box-shadow: 3px 3px 0 var(--toon-ink);
 }
 .faq-item {
-  background: var(--toon-bg);
-  border: 2.5px solid var(--toon-ink);
-  border-radius: 14px;
-  box-shadow: 3px 3px 0 var(--toon-ink);
-  overflow: hidden;
+  background: var(--toon-bg); border: 2.5px solid var(--toon-ink);
+  border-radius: var(--border-radius); box-shadow: var(--shadow-sm); overflow: hidden;
+  transition: box-shadow 0.15s var(cubic-bezier(0.16, 1, 0.3, 1)), transform 0.15s var(cubic-bezier(0.16, 1, 0.3, 1));
 }
+.faq-item:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.faq-item.open { background: var(--toon-surface); }
 .faq-item + .faq-item { margin-top: 12px; }
 .faq-h { margin: 0; }
 .faq-q {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 17px 22px 17px 24px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-  font-family: 'Fredoka', sans-serif;
-  font-size: 1.02rem;
-  font-weight: 500;
-  color: var(--toon-ink);
+  width: 100%; display: flex; align-items: center;
+  justify-content: space-between; gap: 16px; padding: 18px 22px;
+  background: transparent; border: none; cursor: pointer; text-align: left;
+  font-family: 'Fredoka', sans-serif; font-size: 1.02rem; font-weight: 500;
+  color: var(--toon-ink); transition: background 0.15s var(cubic-bezier(0.16, 1, 0.3, 1));
 }
 .faq-q:hover { background: rgba(255, 217, 61, 0.25); }
+.faq-item.open .faq-q { background: rgba(255, 217, 61, 0.16); }
 .faq-chev { flex-shrink: 0; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 .faq-item.open .faq-chev { transform: rotate(180deg); }
-.faq-a {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.35s ease;
-}
+.faq-ready .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s var(cubic-bezier(0.16, 1, 0.3, 1)); }
 .faq-a p {
-  margin: 0;
-  padding: 0 18px 18px;
-  color: var(--toon-muted);
-  line-height: 1.65;
+  margin: 0; padding: 16px 22px 20px;
+  color: var(--toon-muted); line-height: 1.7;
+  border-top: 2px dashed rgba(31, 27, 36, 0.14);
 }
-.faq-item.open .faq-a { max-height: 320px; }
 
 @media (max-width: 480px) {
   .seo-content { padding: 26px 18px; }
@@ -1767,4 +1753,14 @@ input:focus-visible {
   background: #fff4e6;
   margin-bottom: 0;
   box-shadow: 6px 6px 0 var(--toon-ink);
+}
+
+/* the FAQ card clips overflow, so pull its focus outline inside */
+.faq-q:focus-visible { outline-offset: -3px; border-radius: 0; }
+
+/* Focus visibility continued: links and selects were not covered */
+a:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--toon-purple);
+  outline-offset: 2px;
 }
